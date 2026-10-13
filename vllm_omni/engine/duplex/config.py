@@ -515,7 +515,9 @@ class DuplexSessionConfig:
             )
         if isinstance(model, str) and self.model is None:
             self.model = model
-        if isinstance(voice, str) and audio_started:
+        # Explicit null resets an existing selection and must obey the same voice lock.
+        clears_voice = "voice" in payload and payload["voice"] is None and self.voice is not None
+        if audio_started and (isinstance(voice, str) or clears_voice):
             raise DuplexConfigError(
                 "session.update cannot change voice after audio output has started",
                 code="voice_update_after_audio_unsupported",
